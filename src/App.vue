@@ -1,30 +1,33 @@
 <template>
-  <div class="view login" v-if="state.username === '' || state.username === null">
+  <div class="view login" v-if="state.username === '' || state.username === null|| state.roomID === '' || state.roomID === null">
     <form class="login-form" @submit.prevent="Login">
       <div class="form-inner">
-        <h1>Login to VaChat</h1>
-        <label for="username">Username</label>
+        <h1>Join Chatroom</h1>
         <input 
         type="text" 
         v-model="inputUsername" 
-        placeholder="Please enter your user name" />
-        <input type="submit" value="Login">
+        placeholder="Username" />
+        <input 
+        type="text" 
+        v-model="inputRoomID" 
+        placeholder="RoomID" />
+        <input type="submit" value="Join">
       </div>
     </form>
   </div>
 
   <div class="view chat" v-else>
   <header>
-    <button class="logout" @click="Logout">Logout</button>
-    <h1>Welcome, {{ state.username }}</h1>
+    <button class="logout" @click="Logout">Exit</button>
+    <h1>{{ state.roomID }}</h1>
     </header>
     <section class="chat-box">
       <div v-for="message in state.messages" 
-      :key="message.key"
+      v-bind:key="message._id"
       :class="(message.username == state.username ? 'message current-user' : 'message')">
       <div class="message-inner">
-        <div class="username">{{ message.username }}</div>
-        <div class="content">{{ message.content }}</div>
+        <div class="username">{{ state.username == message.username ? "" : message.username }}</div>
+        <div class="content">{{ message.msg }}</div>
         </div>
       </div>
       </section>
@@ -35,72 +38,95 @@
           </form>
         </footer>
   </div>
-
 </template>
 
 <script>
 import { reactive, onMounted, ref } from 'vue';
-import db from './db';
-
+import io from 'socket.io-client';
+//import db from './db';
 export default {
+  
   setup() {
     const inputUsername = ref("");
+    const inputRoomID = ref("");
     const inputMessage = ref("");
+    const socket = io("http://localhost:3000");
 
     const state = reactive({
       username: "",
-      messages: []
+      roomID: "",
+      messages: [],
+      users: []
     })
-
     const Login = () => {
-      if(inputUsername.value != "" || inputUsername.value != null) {
+      if(inputUsername.value != "" || inputUsername.value != null || inputRoomID.value != "" || inputRoomID.value != null ) {
         state.username = inputUsername.value;
+        state.roomID = inputRoomID.value;
         inputUsername.value = "";
+        inputRoomID.value = "";
+
+        socket.emit('newuser', {username: state.username, roomID: state.roomID});
       }
-
     }
-
     const Logout = () => {
       state.username = "";
+      state.roomID = "";
     }
-
     const SendMessage = () => {
-      const messagesRef = db.database().ref("messages");
+      // const messagesRef = db.database().ref("messages");
+      // if(inputMessage.value === "" || inputMessage.value === null) {
+      //   return;
+      // }
+      // const message = {
+      //   username: state.username,
+      //   roomID: state.roomID,
+      //   content: inputMessage.value
+      // }
+      // messagesRef.push(message);
+      // inputMessage.value = "";
 
-      if(inputMessage.value === "" || inputMessage.value === null) {
-        return;
-      }
-
-      const message = {
+      if (inputMessage.value === "" || inputMessage.value === null) {
+				alert("Please enter a message");
+				return;
+			}
+			socket.emit('msg', inputMessage.value);
+			
+      state.messages.push ({
         username: state.username,
-        content: inputMessage.value
-      }
+        msg: inputMessage.value,
+        roomID: state.roomID
+      });
 
-      messagesRef.push(message);
+      
+
       inputMessage.value = "";
     }
-
     onMounted(() => {
-      const messagesRef = db.database().ref("messages");
 
-      messagesRef.on('value', snapshot => {
-        const data = snapshot.val();
-        let messages = [];
-
-        Object.keys(data).forEach(key => {
-          messages.push ({
-            id: key,
-            username: data[key].username,
-            content: data[key].content
-          });
-        });
-
-        state.messages = messages;
+      socket.on('loggedIn', data => {
+        state.messages = data.messages;
+        state.users = data.users;
       });
+      
+      // const messagesRef = db.database().ref("messages");
+      // messagesRef.on('value', snapshot => {
+      //   const data = snapshot.val();
+      //   let messages = [];
+      //   Object.keys(data).forEach(key => {
+      //     messages.push ({
+      //       id: key,
+      //       username: data[key].username,
+      //       content: data[key].content
+      //     });
+      //   });
+      //   state.messages = messages;
+      // });
+
     });
 
     return {
       inputUsername,
+      inputRoomID,
       Login,
       state,
       inputMessage,
@@ -124,7 +150,7 @@ export default {
 	display: flex;
 	justify-content: center;
 	min-height: 100vh;
-	background-color: #ea526f;
+	background-color: #ffffff;
 	
 	&.login {
 		align-items: center;
@@ -132,17 +158,15 @@ export default {
 			display: block;
 			width: 100%;
 			padding: 15px;
-			
 			.form-inner {
 				display: block;
 				background-color: #FFF;
-				padding: 50px 15px;
 				border-radius: 16px;
-				box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
 				h1 {
-					color: #AAA;
+					color: #000;
 					font-size: 28px;
 					margin-bottom: 30px;
+          text-align: center;
 				}
 				label {
 					display: block;
@@ -180,7 +204,7 @@ export default {
 					display: block;
 					width: 100%;
 					padding: 10px 15px;
-					background-color: #ea526f;
+					background-color: #5DB075;
 					border-radius: 8px;
 					color: #FFF;
 					font-size: 18px;
@@ -188,7 +212,7 @@ export default {
 				}
 				&:focus-within {
 					label {
-						color: #ea526f;
+						color: #5DB075;
 					}
 					input[type="text"] {
 						background-color: #FFF;
@@ -210,20 +234,20 @@ export default {
 			padding: 50px 30px 10px;
 			.logout {
 				position: absolute;
-				top: 15px;
-				right: 15px;
+				top: 65px;
+				left: 15px;
 				appearance: none;
 				border: none;
 				outline: none;
 				background: none;
-				
-				color: #FFF;
-				font-size: 18px;
+				color: #5DB075;
+				font-size: 16px;
 				margin-bottom: 10px;
 				text-align: right;
 			}
 			h1 {
-				color: #FFF;
+				color: #000;
+        text-align: center;
 			}
 		}
 		.chat-box {
@@ -264,7 +288,7 @@ export default {
 						.content {
 							color: #FFF;
 							font-weight: 600;
-							background-color: #ea526f;
+							background-color: #5DB075;
 						}
 					}
 				}
@@ -308,7 +332,7 @@ export default {
 					display: block;
 					padding: 10px 15px;
 					border-radius: 0px 8px 8px 0px;
-					background-color: #ea526f;
+					background-color: #5DB075;
 					color: #FFF;
 					font-size: 18px;
 					font-weight: 700;
