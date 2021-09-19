@@ -2,16 +2,16 @@
   <div class="view login" v-if="state.username === '' || state.username === null|| state.roomID === '' || state.roomID === null">
     <form class="login-form" @submit.prevent="Login">
       <div class="form-inner">
-        <h1>Join Chatroom</h1>
-        <input 
+       <h1>Join Chatroom</h1>
+        <div class="upper-input"><input 
         type="text" 
         v-model="inputUsername" 
         placeholder="Username" />
         <input 
         type="text" 
         v-model="inputRoomID" 
-        placeholder="RoomID" />
-        <input type="submit" value="Join">
+        placeholder="RoomID" /></div>
+       <div class="bottom-submit"><input type="submit" value="Join"></div>
       </div>
     </form>
   </div>
@@ -153,20 +153,21 @@ export default {
 	background-color: #ffffff;
 	
 	&.login {
-		align-items: center;
+		align-items: top;
 		.login-form {
 			display: block;
 			width: 100%;
 			padding: 15px;
 			.form-inner {
 				display: block;
+				height: 100%;
 				background-color: #FFF;
 				border-radius: 16px;
 				h1 {
 					color: #000;
 					font-size: 28px;
 					margin-bottom: 30px;
-          text-align: center;
+					text-align: center;
 				}
 				label {
 					display: block;
@@ -221,6 +222,13 @@ export default {
 							color: #666;
 						}
 					}
+				}
+				.upper-input {
+					height: 80%;
+				}
+				.bottom-submit {
+					height: 20%
+					//bottom: 10px;
 				}
 			}
 		}
