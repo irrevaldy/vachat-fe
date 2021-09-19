@@ -2,7 +2,7 @@
   <div class="view login" v-if="state.username === '' || state.username === null|| state.roomID === '' || state.roomID === null">
     <form class="login-form" @submit.prevent="Login">
       <div class="form-inner">
-       <h1>Join Chatroom</h1><h5>(Version 1.1)</h5>
+       <h1>Join Chatroom</h1><!--<h5>(Version 1.1)</h5>-->
         <div class="upper-input"><input 
         type="text" 
         v-model="inputUsername" 
@@ -149,7 +149,7 @@ export default {
 .view {
 	display: flex;
 	justify-content: center;
-	min-height: 100vh;
+	min-height: 50vh;
 	background-color: #ffffff;
 	
 	&.login {
@@ -166,7 +166,7 @@ export default {
 				h1 {
 					color: #000;
 					font-size: 28px;
-					//margin-bottom: 20px;
+					margin-bottom: 20px;
 					text-align: center;
 				}
 				h5 {
@@ -211,7 +211,7 @@ export default {
 					width: 100%;
 					padding: 10px 15px;
 					background-color: #5DB075;
-					border-radius: 8px;
+					border-radius: 20px;
 					color: #FFF;
 					font-size: 18px;
 					font-weight: 700;
