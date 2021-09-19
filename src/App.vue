@@ -11,7 +11,7 @@
         type="text" 
         v-model="inputRoomID" 
         placeholder="RoomID" /></div>
-       <div class="bottom-submit"><input type="submit" value="Join"></div>
+       <div class="bottom-submit"><input type="submit" value="Join"><h5>Version 1.0</h5></div>
       </div>
     </form>
   </div>
@@ -167,6 +167,12 @@ export default {
 					color: #000;
 					font-size: 28px;
 					margin-bottom: 30px;
+					text-align: center;
+				}
+				h5 {
+					color: #000;
+					font-size: 12px;
+					margin-top: 15px;
 					text-align: center;
 				}
 				label {
